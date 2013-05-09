@@ -1,17 +1,21 @@
-var DEBUG = true;
+if(window.DEBUG==undefined )window.DEBUG = true;
 var JSWikiDoc = {
 	html : "",
 	htmlpre : "",
 	htmlmethods : "",
+	htmlPagePrefix : '<!DOCTYPE html PUBLIC "-"http://www.w3.org/TR/html4/strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head></head><body>',
+	htmlPageSuffix : "</body></html>",
 	ids : {
 		convertButton : "convertButton",
 		inputJS : "inputJS",
+		preview : "preview",
 		outputJS : "outputJS"
 	},
 	copy:
 	{
 	parameters:"Parameters",
-	methodList:"Methods"	
+	methodList:"Method List",	
+	methods:"Methods"	
 	},
 	/* @method: init
 	 * @desc: this is the initialisation function
@@ -30,9 +34,11 @@ var JSWikiDoc = {
 	 * @desc: this is the click  function
 	 * @paramName: event
 	 * @paramDesc: this will be the trigger event
+	 * @paramName: Test
+	 * @paramDesc: Test Desc
 	 */
 	onConvertClicked : function(event) {
-		this.html = "";
+		this.htmlmethods= "";
 		var input = document.getElementById(this.ids.inputJS);
 		
 		if (input.value == "" || input.value == " ")
@@ -41,6 +47,7 @@ var JSWikiDoc = {
 		var str = input.value.replace(/(\r\n|\n|\r)/gm, "<br>");
 		var comments = str.match(/\/\*.+?\*\/|\/\/.*(?=[\n\r])/g);
 		this.createPrefix();
+		this.createMethodArea();
 		for (var a = 0; a < comments.length; a++) {
 			this.addToPre(comments[a]);
 
@@ -62,12 +69,12 @@ var JSWikiDoc = {
 		var spec = str.match(reg);
 		if (spec) {
 			if (mutiple) {
-				var arr = new Array();
 				for (var a = 0; a < spec.length; a++) {
 					spec[a] = spec[a].replace("@" + val + ":", "");
 					spec[a] = spec[a].replace("<br>", "");
 					if (nospace)
 						spec[a] = spec[a].replace(/\s/g, "");
+						
 				}
 				return spec;
 			} else {
@@ -101,16 +108,13 @@ var JSWikiDoc = {
 		this.htmlpre = "<h1 class='methodlistTitle'>"+this.copy.methodList+"</h1><ul class='methodlist'>";
 	},
 	createMethodArea : function() {
-		var method = comments[a].match(/@method(.*?)<br>/g);
-		if (method)
-			this.addToPre(method[0]);
+		this.htmlmethods = "<h1 class='methodsTitle'>"+this.copy.methods+"</h1>";
 	},
 	addToPage : function() {
-		console.log(this.htmlpre);
-		console.log(this.htmlmethods);
-		document.body.innerHTML += (this.htmlpre + this.htmlmethods);
+		
+		document.getElementById(this.ids.preview).innerHTML = (this.htmlpre + this.htmlmethods);
 		var output = document.getElementById(this.ids.outputJS);
-		output.value = (this.htmlpre + this.htmlmethods);
+		output.value = (this.htmlPagePrefix+this.htmlpre + this.htmlmethods+this.htmlPageSuffix);
 	}
 };
 (function(window) {
